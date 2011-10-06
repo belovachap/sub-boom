@@ -80,7 +80,11 @@ function main() {
     
     var tick = function(msDuration) {
         // game loop
+        
+        // Draw the background
         display.clear();
+        gamejs.draw.rect(display, "rgba(0,0, 255, .1)", new gamejs.Rect([0, 70], [DISPLAY_WIDTH, DISPLAY_HEIGHT]));
+        
         handle_events(msDuration);
         for (sub in subs) {
             subs[sub].update(msDuration / 1000);
