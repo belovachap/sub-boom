@@ -51,13 +51,37 @@ Submarine.prototype.update = function(sDuration) {
     }
 }
 
+// Missle object
+// Inherits from gamejs.sprite.Sprite
+var Missle = function(rect, direction) {
+    // @param(direction) a array of two that represents speed vector 
+    // call superconstructor
+    Missle.superConstructor.apply(this, arguments);
+    this.speed = 50;
+    this.direction = direction;
+    this.rect = new gamejs.Rect(rect);
+    return this;
+};
+gamejs.utils.objects.extend(Missle, gamejs.sprite.Sprite);
+
+Missle.prototype.draw = function(surface) {
+    gamejs.draw.rect(surface, '#0F0', this.rect, 0);
+}
+
+Missle.prototype.update = function(sDuration) {
+    v_delta = gamejs.utils.vectors.multiply(this.direction, sDuration);
+    this.rect.moveIp(v_delta[0], v_delta[1]);
+}
 // High level game objects
 var destroyer = new Destroyer(new gamejs.Rect([50, 50], [100, 20]));
 
-var subs = []
+var subs = [];
 subs.push(new Submarine(new gamejs.Rect([100, 100], [50, 20]), -20));
 subs.push(new Submarine(new gamejs.Rect([0, 200], [50, 20]), 20));
 subs.push(new Submarine(new gamejs.Rect([400, 150], [50, 20]), 50));
+
+var missles = [];
+missles.push(new Missle(new gamejs.Rect([400, 400], [10, 10]), [-20, -20]));
 
 // Event handling
 function handle_events(msDuration) {
@@ -89,6 +113,10 @@ function main() {
         for (sub in subs) {
             subs[sub].update(msDuration / 1000);
             subs[sub].draw(display);
+        }
+        for (missle in missles) {
+            missles[missle].update(msDuration / 1000);
+            missles[missle].draw(display);
         }
         
         destroyer.draw(display);
