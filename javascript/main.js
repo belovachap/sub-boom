@@ -120,11 +120,11 @@ subs.add(new Submarine(new gamejs.Rect([0, 200], [50, 20]), 20));
 subs.add(new Submarine(new gamejs.Rect([400, 150], [50, 20]), 50));
 
 var missles = new gamejs.sprite.Group();
-missles.add(new Missle(new gamejs.Rect([400, 400], [10, 10]), [-20, -20]));
+missles.add(new Missle(new gamejs.Rect([400, 400], [10, 10]), [-40, -40]));
+missles.add(new Missle(new gamejs.Rect([300, 400], [10, 10]), [0, -40]));
+missles.add(new Missle(new gamejs.Rect([20, 300], [10, 10]), [20, -40]));
 
 var explosions = new gamejs.sprite.Group();
-explosions.add(new Explosion([200, 200], 10, 100, 5));
-explosions.add(new Explosion([300, 200], 10, 50, 2));
 
 // Event handling
 function handle_events(msDuration) {
@@ -175,14 +175,12 @@ function main() {
         // Check for missles that have hit the surface of the water
         var hit_surface = []; 
         missles.forEach(function(missle) {
-            // Determine if missle has hit the surface.
+            // Determine if missle has hit the surface, create explosion if it has.
             if (missle.rect.top <= 70) {
                  hit_surface.push(missle);
+                 explosions.add(new Explosion(missle.rect.center, 10, 30, 1));
             }
         });
-
-        // Create explosions for these surfaced missles
-        // TODO
 
         // Remove exploded missles
         missles.remove(hit_surface);
