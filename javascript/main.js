@@ -73,6 +73,30 @@ Missle.prototype.update = function(sDuration) {
     this.rect.moveIp(v_delta[0], v_delta[1]);
 }
 
+// Bomb object
+// Inherits from gamejs.sprite.Sprite
+var Bomb = function(center, drop_time) {
+    // call superconstructor
+    Bomb.superConstructor.apply(this, arguments);
+    this.speed = 20;
+    this.drop_time = drop_time;
+    this.elapsed_time = 0;
+    this.center = center;
+    return this;
+};
+gamejs.utils.objects.extend(Bomb, gamejs.sprite.Sprite);
+
+Bomb.prototype.draw = function(surface) {
+    gamejs.draw.circle(surface, '#000', this.center, 100, 0);
+}
+
+Bomb.prototype.update = function(sDuration) {
+    this.elapsed_time += sDuration;
+
+    y_delta = this.speed * sDuration;
+    this.center[1] += y_delta;
+}
+
 // Explosion object
 // Inherits from gamejs.sprite.Sprite
 var Explosion = function(center, min_radius, max_radius, duration) {
@@ -123,6 +147,9 @@ var missles = new gamejs.sprite.Group();
 missles.add(new Missle(new gamejs.Rect([400, 400], [10, 10]), [-40, -40]));
 missles.add(new Missle(new gamejs.Rect([300, 400], [10, 10]), [0, -40]));
 missles.add(new Missle(new gamejs.Rect([20, 300], [10, 10]), [20, -40]));
+
+var bombs = new gamejs.sprite.Group();
+bombs.add(new Bomb([10, 10], 10));
 
 var explosions = new gamejs.sprite.Group();
 
@@ -181,6 +208,20 @@ function main() {
                  explosions.add(new Explosion(missle.rect.center, 10, 30, 1));
             }
         });
+
+
+        var remove_bombs = [];
+        bombs.forEach(function(bomb) {
+            if (bomb.elapsed_time > bomb.drop_time) {
+               remove_bombs.push(bomb);
+               explosions.add(new Explosion(bomb.center, 100, 200, 2)); 
+            }
+        });
+
+        bombs.remove(remove_bombs);
+
+        bombs.update(sDuration);
+        bombs.draw(display);
 
         // Remove exploded missles
         missles.remove(hit_surface);
