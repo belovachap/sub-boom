@@ -87,7 +87,7 @@ var Bomb = function(center, drop_time) {
 gamejs.utils.objects.extend(Bomb, gamejs.sprite.Sprite);
 
 Bomb.prototype.draw = function(surface) {
-    gamejs.draw.circle(surface, '#000', this.center, 100, 0);
+    gamejs.draw.circle(surface, '#000', this.center, 10, 0);
 }
 
 Bomb.prototype.update = function(sDuration) {
@@ -164,6 +164,9 @@ function handle_events(msDuration) {
                 } else if (event.key === gamejs.event.K_RIGHT) {
                     destroyer.rect.moveIp(destroyer.speed * sDuration, 0);
                 }
+		  else if (event.key === gamejs.event.K_SPACE) {
+                    bombs.add(new Bomb(destroyer.rect.center, 5)); 
+                }
             }
         });
     }
@@ -214,7 +217,7 @@ function main() {
         bombs.forEach(function(bomb) {
             if (bomb.elapsed_time > bomb.drop_time) {
                remove_bombs.push(bomb);
-               explosions.add(new Explosion(bomb.center, 100, 200, 2)); 
+               explosions.add(new Explosion(bomb.center, 10, 50, 2)); 
             }
         });
 
