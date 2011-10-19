@@ -154,22 +154,39 @@ bombs.add(new Bomb([10, 10], 10));
 var explosions = new gamejs.sprite.Group();
 
 // Event handling
-function handle_events(msDuration) {
+var handle_events = (function() {
+    var space_bar_down = false;
+    var space_bar_down_time;
+
+    return function (msDuration) {
         // Get the last events...
         sDuration = msDuration / 1000;
         gamejs.event.get().forEach(function(event) {
             if (event.type === gamejs.event.KEY_DOWN) {
                 if (event.key === gamejs.event.K_LEFT) {
                     destroyer.rect.moveIp(-1 * destroyer.speed * sDuration, 0);
-                } else if (event.key === gamejs.event.K_RIGHT) {
+                } 
+                else if (event.key === gamejs.event.K_RIGHT) {
                     destroyer.rect.moveIp(destroyer.speed * sDuration, 0);
                 }
-		  else if (event.key === gamejs.event.K_SPACE) {
-                    bombs.add(new Bomb(destroyer.rect.center, 5)); 
+		else if (event.key === gamejs.event.K_SPACE && !space_bar_down) {
+                    space_bar_down = true;
+                    space_bar_down_time = new Date();
+                }
+            }
+            else if (event.type === gamejs.event.KEY_UP) {
+                if (event.key === gamejs.event.K_SPACE && space_bar_down) {
+                    var now = new Date();
+                    var depth_time = 1 + (now.getTime() - space_bar_down_time.getTime()) / 1000;
+                    console.log(depth_time);
+                    bombs.add(new Bomb(destroyer.rect.center, depth_time)); 
+
+                    space_bar_down = false;
                 }
             }
         });
     }
+})();
 
 function main() {
 
