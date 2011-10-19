@@ -25,6 +25,8 @@ var Submarine = function(rect, speed) {
     Submarine.superConstructor.apply(this, arguments);
     this.speed = speed;
     this.rect = new gamejs.Rect(rect);
+    this.last_missile_time = 0;
+    this.reload_time = 10 + Math.random() * 5;
     return this;
 };
 gamejs.utils.objects.extend(Submarine, gamejs.sprite.Sprite);
@@ -49,7 +51,20 @@ Submarine.prototype.update = function(sDuration) {
             this.rect.left = DISPLAY_WIDTH;
         }   
     }
+
+    // Handle missile firing
+    this.last_missile_time += sDuration;
+    if (this.last_missile_time >= this.reload_time) {
+        this.fire_missile();
+    }
 }
+
+Submarine.prototype.fire_missile = function () {
+    this.last_missile_time = 0;
+    var x_direction = (Math.random() - .5) * 40;
+    missles.add(new Missle(new gamejs.Rect(this.rect.center, [10, 10]), [x_direction , -40]));
+}
+
 
 // Missle object
 // Inherits from gamejs.sprite.Sprite
