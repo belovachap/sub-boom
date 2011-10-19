@@ -159,12 +159,8 @@ subs.add(new Submarine(new gamejs.Rect([0, 200], [50, 20]), 20));
 subs.add(new Submarine(new gamejs.Rect([400, 150], [50, 20]), 50));
 
 var missles = new gamejs.sprite.Group();
-missles.add(new Missle(new gamejs.Rect([400, 400], [10, 10]), [-40, -40]));
-missles.add(new Missle(new gamejs.Rect([300, 400], [10, 10]), [0, -40]));
-missles.add(new Missle(new gamejs.Rect([20, 300], [10, 10]), [20, -40]));
 
 var bombs = new gamejs.sprite.Group();
-bombs.add(new Bomb([10, 10], 10));
 
 var explosions = new gamejs.sprite.Group();
 
