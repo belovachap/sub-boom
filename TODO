@@ -1,0 +1,5 @@
+// Stuff to do!
+
+* Explosions should interact with subs, missles, and the destroyer
+* Take a look at the ship key-movement code. Should it act more like the
+  stuff used to control the release of the depth-charge?
