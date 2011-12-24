@@ -1,5 +1,7 @@
 var gamejs = require('gamejs');
 
+var DISPLAY_DEBUG = true;
+var DISPLAY_DEBUG_COLOR = "#ff0000";
 var DISPLAY_WIDTH = 640;
 var DISPLAY_HEIGHT = 480;
 
@@ -44,12 +46,12 @@ Submarine.prototype.update = function(sDuration) {
         // Check if the left side of the submarine is beyond DISPLAY_WIDTH
         if (this.rect.left >= DISPLAY_WIDTH) {
             this.rect.right = 0;
-        }   
+        }
     } else {
         // Check if the right side of the submarine is beyond 0
         if (this.rect.right <= 0) {
             this.rect.left = DISPLAY_WIDTH;
-        }   
+        }
     }
 
     // Handle missile firing
@@ -126,14 +128,32 @@ var Explosion = function(center, min_radius, max_radius, duration) {
     this.max_radius = max_radius;
     this.duration = duration;
     this.rgba_color = "rgba(255, 153, 51, 1)";
-    this.radius = min_radius;
+    this.set_radius(min_radius);
     this.elapsed_time = 0;
+    //console.info('new explosion:', this);
     return this;
 }
 gamejs.utils.objects.extend(Explosion, gamejs.sprite.Sprite);
 
+Explosion.prototype.set_radius = function(r) {
+    // Set the new radius
+    this.radius = r;
+
+    // Update the bounding rect
+    var left = this.center[0] - this.radius;
+    var top = this.center[1] - this.radius;
+    var width = 2 * this.radius;
+    var height = width;
+    this.rect = new gamejs.Rect(left, top, width, height);
+
+}
+
 Explosion.prototype.draw = function(surface) { 
     gamejs.draw.circle(surface, this.rgba_color, this.center, this.radius);
+    
+    if (DISPLAY_DEBUG) {
+        gamejs.draw.rect(surface, DISPLAY_DEBUG_COLOR, this.rect, 2);
+    }
 };
 
 Explosion.prototype.update = function(sDuration) {
@@ -141,7 +161,7 @@ Explosion.prototype.update = function(sDuration) {
     var tween = Math.min((this.elapsed_time / this.duration), 1);
     var alpha = 1 - tween;
 
-    this.radius = this.min_radius * (1 - tween) + this.max_radius * tween;
+    this.set_radius(this.min_radius * (1 - tween) + this.max_radius * tween);
     this.rgba_color = "rgba(255, 153, 51, " + alpha + ")";
 };
 
@@ -189,7 +209,6 @@ var handle_events = (function() {
                 if (event.key === gamejs.event.K_SPACE && space_bar_down) {
                     var now = new Date();
                     var depth_time = 1 + (now.getTime() - space_bar_down_time.getTime()) / 1000;
-                    console.log(depth_time);
                     bombs.add(new Bomb(destroyer.rect.center, depth_time)); 
 
                     space_bar_down = false;
@@ -216,6 +235,22 @@ function main() {
 
         // Update explosions. Check for collision with subs, missles and destroyer.
         // TODO: collision detection
+
+        // Get explosions that are close to subs
+        var dead_subs = [];
+        gamejs.sprite.groupCollide(subs, explosions).forEach(function (collision) {
+            var hit_sub = collision.a;
+            var hit_explosion = collision.b;
+            // Do processing here!
+            // TODO better collision detection
+            console.info('sub: ', hit_sub, 'explosion: ', hit_explosion);
+            // Remove the sub from the sub list
+            dead_subs.push(hit_sub);
+            // Replace it with an explosion
+            explosions.add(new Explosion(hit_sub.rect.center, 10, 30, 1));
+        });
+        subs.remove(dead_subs);
+
         explosions.update(sDuration);
         var finished_explosions = [];
         explosions.forEach(function(explosion) {
@@ -270,6 +305,5 @@ function main() {
     gamejs.time.fpsCallback(tick, this, 30);
 
 }
-
 
 gamejs.ready(main);
