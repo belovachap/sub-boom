@@ -3,3 +3,6 @@
 * Explosions should interact with subs, missles, and the destroyer
 * Take a look at the ship key-movement code. Should it act more like the
   stuff used to control the release of the depth-charge?
+* Add subs to the game at an increasing frequency over time at random depths
+* Start keeping track of how many subs are destroyed and display as a score
+* End the game when the destroyer is hit. Display GameOver and # subs destroyed

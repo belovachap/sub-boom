@@ -218,90 +218,105 @@ var handle_events = (function() {
     }
 })();
 
+var display = gamejs.display.setMode([DISPLAY_WIDTH, DISPLAY_HEIGHT]);
+
+var tick = function(msDuration) {
+    // game loop
+        
+    // Draw the background
+    display.clear();
+    gamejs.draw.rect(display, "rgba(0,0, 255, .1)", new gamejs.Rect([0, 70], [DISPLAY_WIDTH, DISPLAY_HEIGHT]));
+    
+    handle_events(msDuration);
+
+    var sDuration = msDuration / 1000;
+
+    // Update explosions. Check for collision with subs, missles and destroyer.
+    // TODO: collision detection
+
+    // Check if the destroyer was killed 
+    if (gamejs.sprite.spriteCollide(destroyer, explosions).length != 0) {
+        console.info('Destroyer was HIT!!');
+        gamejs.time.deleteCallback(tick, 30);
+        // Stop the game, put up a Game Over sign
+        // create a font
+        var font = new gamejs.font.Font('20px monospace');
+        // render text - this returns a surface with the text written on it.
+        var helloSurface = font.render('Game Over');
+        display.blit(helloSurface);
+        return;
+    }
+
+    // Get explosions that are close to subs
+    var dead_subs = [];
+    gamejs.sprite.groupCollide(subs, explosions).forEach(function (collision) {
+        var hit_sub = collision.a;
+        var hit_explosion = collision.b;
+        // Do processing here!
+        // TODO better collision detection
+        //console.info('sub: ', hit_sub, 'explosion: ', hit_explosion);
+        // Remove the sub from the sub list
+        dead_subs.push(hit_sub);
+        // Replace it with an explosion
+        explosions.add(new Explosion(hit_sub.rect.center, 10, 30, 1));
+    });
+    subs.remove(dead_subs);
+
+    explosions.update(sDuration);
+    var finished_explosions = [];
+    explosions.forEach(function(explosion) {
+        if (explosion.finished()) {
+            finished_explosions.push(explosion);
+        }
+    });
+    explosions.remove(finished_explosions);
+
+    subs.update(sDuration);
+    subs.draw(display);
+
+    missles.update(sDuration);
+
+    // Check for missles that have hit the surface of the water
+    var hit_surface = []; 
+    missles.forEach(function(missle) {
+        // Determine if missle has hit the surface, create explosion if it has.
+        if (missle.rect.top <= 70) {
+             hit_surface.push(missle);
+             explosions.add(new Explosion(missle.rect.center, 10, 30, 1));
+        }
+    });
+
+
+    var remove_bombs = [];
+    bombs.forEach(function(bomb) {
+        if (bomb.elapsed_time > bomb.drop_time) {
+           remove_bombs.push(bomb);
+           explosions.add(new Explosion(bomb.center, 10, 50, 2)); 
+        }
+    });
+
+    bombs.remove(remove_bombs);
+
+    bombs.update(sDuration);
+    bombs.draw(display);
+
+    // Remove exploded missles
+    missles.remove(hit_surface);
+
+    missles.draw(display);
+
+    destroyer.draw(display);
+
+    // Is this the best place to be drawing the explosions?
+    // Might need to think about this some more; we do pick up more explosions
+    // in the mid-section of the code...
+    explosions.draw(display);
+    return;
+};
+
 function main() {
 
-    var display = gamejs.display.setMode([DISPLAY_WIDTH, DISPLAY_HEIGHT]);
     
-    var tick = function(msDuration) {
-        // game loop
-        
-        // Draw the background
-        display.clear();
-        gamejs.draw.rect(display, "rgba(0,0, 255, .1)", new gamejs.Rect([0, 70], [DISPLAY_WIDTH, DISPLAY_HEIGHT]));
-        
-        handle_events(msDuration);
-
-        var sDuration = msDuration / 1000;
-
-        // Update explosions. Check for collision with subs, missles and destroyer.
-        // TODO: collision detection
-
-        // Get explosions that are close to subs
-        var dead_subs = [];
-        gamejs.sprite.groupCollide(subs, explosions).forEach(function (collision) {
-            var hit_sub = collision.a;
-            var hit_explosion = collision.b;
-            // Do processing here!
-            // TODO better collision detection
-            console.info('sub: ', hit_sub, 'explosion: ', hit_explosion);
-            // Remove the sub from the sub list
-            dead_subs.push(hit_sub);
-            // Replace it with an explosion
-            explosions.add(new Explosion(hit_sub.rect.center, 10, 30, 1));
-        });
-        subs.remove(dead_subs);
-
-        explosions.update(sDuration);
-        var finished_explosions = [];
-        explosions.forEach(function(explosion) {
-            if (explosion.finished()) {
-                finished_explosions.push(explosion);
-            }
-        });
-        explosions.remove(finished_explosions);
-
-        subs.update(sDuration);
-        subs.draw(display);
-
-        missles.update(sDuration);
-
-        // Check for missles that have hit the surface of the water
-        var hit_surface = []; 
-        missles.forEach(function(missle) {
-            // Determine if missle has hit the surface, create explosion if it has.
-            if (missle.rect.top <= 70) {
-                 hit_surface.push(missle);
-                 explosions.add(new Explosion(missle.rect.center, 10, 30, 1));
-            }
-        });
-
-
-        var remove_bombs = [];
-        bombs.forEach(function(bomb) {
-            if (bomb.elapsed_time > bomb.drop_time) {
-               remove_bombs.push(bomb);
-               explosions.add(new Explosion(bomb.center, 10, 50, 2)); 
-            }
-        });
-
-        bombs.remove(remove_bombs);
-
-        bombs.update(sDuration);
-        bombs.draw(display);
-
-        // Remove exploded missles
-        missles.remove(hit_surface);
-
-        missles.draw(display);
-
-        destroyer.draw(display);
-
-        // Is this the best place to be drawing the explosions?
-        // Might need to think about this some more; we do pick up more explosions
-        // in the mid-section of the code...
-        explosions.draw(display);
-        return;
-    };
     gamejs.time.fpsCallback(tick, this, 30);
 
 }
