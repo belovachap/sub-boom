@@ -4,6 +4,8 @@ var DISPLAY_DEBUG = true;
 var DISPLAY_DEBUG_COLOR = "#ff0000";
 var DISPLAY_WIDTH = 640;
 var DISPLAY_HEIGHT = 480;
+var WATER_LEVEL = 70; // Constant that determines where the ocean is drawn 
+var MIN_SUB_DEPTH = WATER_LEVEL + 20; // Subs should be at this depth or lower 
 
 // Destroyer object
 // Inherits from gamejs.sprite.Sprite
@@ -226,14 +228,14 @@ var tick = function(msDuration) {
     // Should add a sub?
     if (add_sub_time >= 10) {
         add_sub_time = 0.0;
-        var depth = Math.floor(Math.random() * DISPLAY_HEIGHT);
+        var depth = Math.floor((Math.random() * (DISPLAY_HEIGHT - MIN_SUB_DEPTH)) + MIN_SUB_DEPTH);
         var speed = (Math.random() - 0.5) * 40;
         subs.add(new Submarine(new gamejs.Rect([-50, depth], [50, 20]), speed));
     }
         
     // Draw the background
     display.clear();
-    gamejs.draw.rect(display, "rgba(0,0, 255, .1)", new gamejs.Rect([0, 70], [DISPLAY_WIDTH, DISPLAY_HEIGHT]));
+    gamejs.draw.rect(display, "rgba(0,0, 255, .1)", new gamejs.Rect([0, WATER_LEVEL], [DISPLAY_WIDTH, DISPLAY_HEIGHT]));
     
     handle_events(msDuration);
 
@@ -287,7 +289,7 @@ var tick = function(msDuration) {
     var hit_surface = []; 
     missles.forEach(function(missle) {
         // Determine if missle has hit the surface, create explosion if it has.
-        if (missle.rect.top <= 70) {
+        if (missle.rect.top <= WATER_LEVEL) {
              hit_surface.push(missle);
              explosions.add(new Explosion(missle.rect.center, 10, 30, 1));
         }
