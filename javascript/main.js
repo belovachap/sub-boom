@@ -174,9 +174,6 @@ Explosion.prototype.finished = function() {
 var destroyer = new Destroyer(new gamejs.Rect([50, 50], [100, 20]));
 
 var subs = new gamejs.sprite.Group();
-subs.add(new Submarine(new gamejs.Rect([100, 100], [50, 20]), -20));
-subs.add(new Submarine(new gamejs.Rect([0, 200], [50, 20]), 20));
-subs.add(new Submarine(new gamejs.Rect([400, 150], [50, 20]), 50));
 
 var missles = new gamejs.sprite.Group();
 
@@ -219,9 +216,20 @@ var handle_events = (function() {
 })();
 
 var display = gamejs.display.setMode([DISPLAY_WIDTH, DISPLAY_HEIGHT]);
+var add_sub_time = 10.0;
 
 var tick = function(msDuration) {
     // game loop
+    var sDuration = msDuration / 1000;
+    add_sub_time += sDuration
+
+    // Should add a sub?
+    if (add_sub_time >= 10) {
+        add_sub_time = 0.0;
+        var depth = Math.floor(Math.random() * DISPLAY_HEIGHT);
+        var speed = (Math.random() - 0.5) * 40;
+        subs.add(new Submarine(new gamejs.Rect([-50, depth], [50, 20]), speed));
+    }
         
     // Draw the background
     display.clear();
@@ -229,7 +237,6 @@ var tick = function(msDuration) {
     
     handle_events(msDuration);
 
-    var sDuration = msDuration / 1000;
 
     // Update explosions. Check for collision with subs, missles and destroyer.
     // TODO: collision detection
